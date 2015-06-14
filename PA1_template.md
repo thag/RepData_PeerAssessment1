@@ -75,7 +75,7 @@ The code below makes a time series plot of the 5-minute interval and the average
 ```r
 AvgStepsTakenPerInterval <- aggregate(activities$steps, by=list(interval=activities$interval), FUN=mean, na.rm=TRUE)
 names(AvgStepsTakenPerInterval) <- c("interval","avgSteps")
-with(AvgStepsTakenPerInterval, plot(interval, avgSteps, type = "l" ,xlab="Interval", ylab = "Average Steps", main ="Average Steps of the 5-minute Interval"))
+with(AvgStepsTakenPerInterval, plot(interval, avgSteps, type = "l" ,xlab="Time Interval", ylab = "Average Steps", main ="Average Steps of the 5-minute Interval"))
 ```
 
 ![plot of chunk analysis2.1](figure/analysis2.1-1.png) 
@@ -104,13 +104,18 @@ nrow(activities[!complete.cases(activities),])
 ## [1] 2304
 ```
 
-Since NA values can affect the result, we are replacing the NA values for a particular date with the average number of steps for that date. If none exists, values 0 is used. This new dataset with filled values is called newActivities. The nrow() function call shows that all the NA values have been replaced.
+Since NA values can affect the result, we are replacing the NA values for a particular date with the average number of steps for that date. If none exists, value 0 is used. This new dataset with filled values is called newActivities. The nrow() function call shows that all the NA values have been replaced.
 
 
 ```r
+#find average per day
 AvgStepsTakenPerDay <- tapply(activities$steps, activities$date, FUN=mean, na.action = na.omit)
+
+#if it is NA, set 0
 AvgStepsTakenPerDay[is.na(AvgStepsTakenPerDay)] <- 0
 newActivities <- activities
+
+#display nrow() before imputing to see how many NA values are there
 nrow(newActivities[!complete.cases(newActivities),])
 ```
 
@@ -119,7 +124,10 @@ nrow(newActivities[!complete.cases(newActivities),])
 ```
 
 ```r
+#imputing
 newActivities$steps <- ifelse(is.na(newActivities$steps), AvgStepsTakenPerDay[newActivities$date], newActivities$steps)
+
+#display nrow() after imputing to show that there are no NA values
 nrow(newActivities[!complete.cases(newActivities),])
 ```
 
@@ -172,12 +180,14 @@ median(TotalStepsTakenPerDay)
 ## [1] 10395
 ```
 
-Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+*Do these values calculated above differ from the estimates from the first part of the assignment that ignored NA values? In other words, what is the impact of imputing missing data on the estimates of the total daily number of steps?*
 
 Comparing plot from Analysis 1 and this analysis, there is a diffrence in the estimates, but the trend looks similar. Though, mean number of steps were used for each date, it may be beneficial to explore other methods to replace the values. Such as median of the number of steps, or values based on the intervals across all days, etc.
 
 
 ## Analysis 4: Are there differences in activity patterns between weekdays and weekends?
+
+This is an interesting question. Below we construct the graph to compare the results. As shown, one noticable observation is that the average number of steps is more for many intervals during weekends when compared to weekdays.
 
 The code below creates a new factor variable isWeekday with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day. It uses the iSWeekday() function from timeDate.
 
